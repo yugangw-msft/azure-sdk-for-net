@@ -258,7 +258,7 @@ namespace Authorization.Tests
             httpRequest.Headers.Add("Accept", "application/json;odata=minimalmetadata");
 
 
-            if (this.testEnvironment != null && this.testEnvironment.TokenInfo != null)
+            if (this.testEnvironment != null && this.testEnvironment.Credentials != null)
             {
                 // Not Supported in current code
                 // var tokenCredentials = (TokenCredentials)this.testEnvironment.Credentials;

@@ -45,7 +45,7 @@ namespace Microsoft.Rest.ClientRuntime.Azure.TestFramework
             {
                 testEnv.UserName = TestEnvironment.UserIdDefault;
                 SetEnvironmentSubscriptionId(testEnv, connectionString);
-                testEnv.TokenInfo = new TokenInfo(TestEnvironment.RawTokenDefault);
+                testEnv.Credentials = new TokenInfo(TestEnvironment.RawTokenDefault);
             }
             else //Record or None
             {
@@ -62,7 +62,7 @@ namespace Microsoft.Rest.ClientRuntime.Azure.TestFramework
                     if (parsedConnection.ContainsKey(TestEnvironment.RawToken))
                     {
                         var token = parsedConnection[TestEnvironment.RawToken];
-                        testEnv.TokenInfo = new TokenInfo(token);
+                        testEnv.Credentials = new TokenInfo(token);
                     }
                     else
                     {
@@ -77,7 +77,7 @@ namespace Microsoft.Rest.ClientRuntime.Azure.TestFramework
                                 testEnv.Endpoints.AADTokenAudienceUri.ToString(),
                                 testEnv.Endpoints.AADAuthUri.ToString())
                                 .ConfigureAwait(false).GetAwaiter().GetResult();
-                            testEnv.TokenInfo = new TokenInfo(result);
+                            testEnv.Credentials = new TokenInfo(result);
                         }
                         else if (testEnv.ServicePrincipal != null && password != null)
                         {
@@ -87,7 +87,7 @@ namespace Microsoft.Rest.ClientRuntime.Azure.TestFramework
                                 testEnv.Endpoints.AADTokenAudienceUri.ToString(),
                                 testEnv.Endpoints.AADAuthUri.ToString())
                                 .ConfigureAwait(false).GetAwaiter().GetResult();
-                            testEnv.TokenInfo = new TokenInfo(result);
+                            testEnv.Credentials = new TokenInfo(result);
                         }
 #if NET45
                         else
@@ -96,7 +96,7 @@ namespace Microsoft.Rest.ClientRuntime.Azure.TestFramework
                                 testEnv.Endpoints.AADTokenAudienceUri.ToString(),
                                 testEnv.Endpoints.AADAuthUri.ToString())
                                 .ConfigureAwait(false).GetAwaiter().GetResult();
-                            testEnv.TokenInfo = new TokenInfo(result);
+                            testEnv.Credentials = new TokenInfo(result);
                         }
 #endif
                     }
@@ -109,7 +109,7 @@ namespace Microsoft.Rest.ClientRuntime.Azure.TestFramework
                     //Getting subscriptions from server
                     var subscriptions = ListSubscriptions(
                         testEnv.BaseUri.ToString(),
-                        testEnv.TokenInfo);
+                        testEnv.Credentials);
 
                     if (subscriptions.Count == 0)
                     {
@@ -189,7 +189,7 @@ namespace Microsoft.Rest.ClientRuntime.Azure.TestFramework
             }
         }
 
-        public static List<SubscriptionInfo> ListSubscriptions(string baseuri, TokenInfo token)
+        public static List<SubscriptionInfo> ListSubscriptions(string baseuri, ITestCredentials testCred)
         {
             var request = new HttpRequestMessage
             {
@@ -197,8 +197,7 @@ namespace Microsoft.Rest.ClientRuntime.Azure.TestFramework
             };
 
             HttpClient client = new HttpClient();
-            request.Headers.Authorization = new AuthenticationHeaderValue(token.AccessTokenType, 
-                token.AccessToken);
+            testCred.ApplyCredentials(request);
             HttpResponseMessage response = client.SendAsync(request).Result;
             response.EnsureSuccessStatusCode();
 

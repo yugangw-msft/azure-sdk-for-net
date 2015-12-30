@@ -97,8 +97,9 @@ namespace Microsoft.Azure.Search.Tests.Utilities
                     String.Format("indexes/{0}/", indexName));
 
             currentEnvironment.BaseUri = baseUri;
-            currentEnvironment.Credentials = new SearchCredentials(apiKey);
-            return MockContext.GetServiceClient<SearchIndexClient>(currentEnvironment, handlers);
+            SearchCredentials originalCred = new SearchCredentials(apiKey);
+            currentEnvironment.Credentials = new SearchTestCredentials(originalCred);
+            return MockContext.GetServiceClientWithCredentials<SearchIndexClient>(currentEnvironment, originalCred, handlers);
         }
     }
 }
